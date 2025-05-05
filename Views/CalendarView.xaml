@@ -1,0 +1,27 @@
+<Window x:Class="SchedulingDesktopWGU.Views.CalendarView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Calendar View" Height="400" Width="600">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Date Selector -->
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+            <TextBlock Text="Select a Date:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <DatePicker x:Name="dpSelectDate" SelectedDateChanged="dpSelectDate_SelectedDateChanged"/>
+        </StackPanel>
+
+        <!-- Appointment List -->
+        <DataGrid x:Name="AppointmentGrid" Grid.Row="1" AutoGenerateColumns="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Customer" Binding="{Binding customerName}" Width="150"/>
+                <DataGridTextColumn Header="Type" Binding="{Binding type}" Width="100"/>
+                <DataGridTextColumn Header="Start Time" Binding="{Binding start}" Width="150"/>
+                <DataGridTextColumn Header="End Time" Binding="{Binding end}" Width="150"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Window>

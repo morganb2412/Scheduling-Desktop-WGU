@@ -1,0 +1,21 @@
+﻿<Window x:Class="SchedulingDesktopWGU.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Login" Height="250" Width="350">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Username:" Grid.Row="0"/>
+        <TextBox x:Name="txtUsername" Grid.Row="1" Margin="0,5,0,10"/>
+
+        <TextBlock Text="Password:" Grid.Row="2"/>
+        <PasswordBox x:Name="txtPassword" Grid.Row="3" Margin="0,5,0,10"/>
+
+        <Button Content="Login" Grid.Row="3" Height="30" Click="Login_Click" HorizontalAlignment="Center" Margin="0,32,0,-29"/>
+    </Grid>
+</Window>

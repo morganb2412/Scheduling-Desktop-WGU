@@ -1,0 +1,15 @@
+<Window x:Class="SchedulingDesktopWGU.Views.ReportsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Reports" Height="500" Width="700">
+    <Grid Margin="10">
+        <StackPanel>
+            <ComboBox x:Name="reportSelector" Margin="0,0,0,10" SelectionChanged="reportSelector_SelectionChanged">
+                <ComboBoxItem Content="Appointments by Type and Month" />
+                <ComboBoxItem Content="Schedule for Each User" />
+                <ComboBoxItem Content="Appointments by City" />
+            </ComboBox>
+            <DataGrid x:Name="ReportGrid" AutoGenerateColumns="True" Height="400"/>
+        </StackPanel>
+    </Grid>
+</Window>
