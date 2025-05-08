@@ -49,6 +49,12 @@ namespace SchedulingDesktopWGU.Views
             var reportsWindow = new ReportsWindow();
             reportsWindow.ShowDialog();
         }
+        private void ViewCalendar_Click(object sender, RoutedEventArgs e)
+        {
+            var calendarView = new CalendarView();
+            calendarView.ShowDialog();
+        }
+
 
         private bool ValidateCustomer()
         {
