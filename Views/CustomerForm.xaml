@@ -36,9 +36,9 @@
             </StackPanel>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
-                <Button Content="Add" Width="75" Click="Add_Click" Margin="5"/>
-                <Button Content="Update" Width="75" Click="Update_Click" Margin="5"/>
-                <Button Content="Delete" Width="75" Click="Delete_Click" Margin="5"/>
+                <Button Content="Add" Width="75" Click="Add_Click" Margin="5" Height="21"/>
+                <Button Content="Update" Width="75" Click="Update_Click" Margin="5" Height="22"/>
+                <Button Content="Delete" Width="75" Click="Delete_Click" Margin="5" Height="23"/>
                 <Button Content="View Reports" Width="120" Click="ViewReports_Click" Margin="10"/>
                 <Button Content="View Calendar" Width="120" Click="ViewCalendar_Click" Margin="10"/>
 
