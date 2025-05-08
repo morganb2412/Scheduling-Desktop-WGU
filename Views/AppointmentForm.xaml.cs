@@ -126,7 +126,10 @@ namespace SchedulingDesktopWGU.Views
                 int customerId = (int)cbCustomers.SelectedValue;
                 string type = txtType.Text.Trim();
                 string title = "General Appointment";
-                string description = "No description"; // Default description
+                string description = "No description";
+                string location = "Online";
+                string contact = "Not specified";
+                string url = "N/A";
 
                 DateTime startLocal = DateTime.ParseExact($"{dpDate.SelectedDate:yyyy-MM-dd} {txtStart.Text}", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
                 DateTime endLocal = DateTime.ParseExact($"{dpDate.SelectedDate:yyyy-MM-dd} {txtEnd.Text}", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
@@ -149,16 +152,21 @@ namespace SchedulingDesktopWGU.Views
                 DBHelper.OpenConnection();
 
                 string query = @"INSERT INTO appointment 
-                         (title, description, customerId, userId, type, start, end, createDate, createdBy, lastUpdate, lastUpdateBy)
-                         VALUES (@title, @description, @custId, 1, @type, @start, @end, NOW(), 'admin', NOW(), 'admin')";
+                         (title, description, location, contact, type, url, customerId, userId, start, end, createDate, createdBy, lastUpdate, lastUpdateBy)
+                         VALUES 
+                         (@title, @description, @location, @contact, @type, @url, @custId, 1, @start, @end, NOW(), 'admin', NOW(), 'admin')";
 
                 var cmd = new MySqlCommand(query, DBHelper.conn);
                 cmd.Parameters.AddWithValue("@title", title);
                 cmd.Parameters.AddWithValue("@description", description);
-                cmd.Parameters.AddWithValue("@custId", customerId);
+                cmd.Parameters.AddWithValue("@location", location);
+                cmd.Parameters.AddWithValue("@contact", contact);
                 cmd.Parameters.AddWithValue("@type", type);
+                cmd.Parameters.AddWithValue("@url", url);
+                cmd.Parameters.AddWithValue("@custId", customerId);
                 cmd.Parameters.AddWithValue("@start", startUtc);
                 cmd.Parameters.AddWithValue("@end", endUtc);
+
                 cmd.ExecuteNonQuery();
 
                 MessageBox.Show("Appointment added.");
@@ -174,6 +182,7 @@ namespace SchedulingDesktopWGU.Views
                 DBHelper.CloseConnection();
             }
         }
+
 
 
         private void Update_Click(object sender, RoutedEventArgs e)
