@@ -83,18 +83,18 @@ namespace SchedulingDesktopWGU.Views
             }
         }
 
-        private bool IsWithinBusinessHours(DateTime start, DateTime end)
+        private bool IsWithinBusinessHours(DateTime localStart, DateTime localEnd)
         {
             TimeZoneInfo estZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
-            var startEST = TimeZoneInfo.ConvertTimeFromUtc(start, estZone);
-            var endEST = TimeZoneInfo.ConvertTimeFromUtc(end, estZone);
+
+            DateTime startEST = TimeZoneInfo.ConvertTime(localStart, estZone);
+            DateTime endEST = TimeZoneInfo.ConvertTime(localEnd, estZone);
 
             bool isWeekday = startEST.DayOfWeek >= DayOfWeek.Monday && startEST.DayOfWeek <= DayOfWeek.Friday;
             bool inHours = startEST.TimeOfDay >= TimeSpan.FromHours(9) && endEST.TimeOfDay <= TimeSpan.FromHours(17);
 
             return isWeekday && inHours;
         }
-
 
         private bool HasOverlap(DateTime start, DateTime end)
         {
@@ -113,7 +113,6 @@ namespace SchedulingDesktopWGU.Views
             return overlap;
         }
 
-
         private void Add_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -129,15 +128,16 @@ namespace SchedulingDesktopWGU.Views
                 DateTime startLocal = DateTime.ParseExact($"{dpDate.SelectedDate:yyyy-MM-dd} {txtStart.Text}", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
                 DateTime endLocal = DateTime.ParseExact($"{dpDate.SelectedDate:yyyy-MM-dd} {txtEnd.Text}", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
 
-                // Convert to UTC
-                DateTime startUtc = startLocal.ToUniversalTime();
-                DateTime endUtc = endLocal.ToUniversalTime();
-
-                if (!IsWithinBusinessHours(startUtc, endUtc))
+                // ✅ Validate against EST
+                if (!IsWithinBusinessHours(startLocal, endLocal))
                 {
                     MessageBox.Show("Appointment must be within business hours (9:00 AM – 5:00 PM EST, Monday–Friday).");
                     return;
                 }
+
+                // ✅ Convert to UTC after validation
+                DateTime startUtc = startLocal.ToUniversalTime();
+                DateTime endUtc = endLocal.ToUniversalTime();
 
                 if (HasOverlap(startUtc, endUtc))
                 {
@@ -172,7 +172,6 @@ namespace SchedulingDesktopWGU.Views
             }
         }
 
-
         private void Update_Click(object sender, RoutedEventArgs e)
         {
             if (selectedAppointmentId == -1)
@@ -188,14 +187,14 @@ namespace SchedulingDesktopWGU.Views
                 DateTime startLocal = DateTime.ParseExact($"{dpDate.SelectedDate:yyyy-MM-dd} {txtStart.Text}", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
                 DateTime endLocal = DateTime.ParseExact($"{dpDate.SelectedDate:yyyy-MM-dd} {txtEnd.Text}", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
 
-                DateTime utcStart = startLocal.ToUniversalTime();
-                DateTime utcEnd = endLocal.ToUniversalTime();
-
-                if (!IsWithinBusinessHours(utcStart, utcEnd))
+                if (!IsWithinBusinessHours(startLocal, endLocal))
                 {
                     MessageBox.Show("Appointment must be within business hours.");
                     return;
                 }
+
+                DateTime utcStart = startLocal.ToUniversalTime();
+                DateTime utcEnd = endLocal.ToUniversalTime();
 
                 DBHelper.OpenConnection();
                 string query = @"UPDATE appointment 
