@@ -23,5 +23,8 @@
                 <DataGridTextColumn Header="End Time" Binding="{Binding end}" Width="150"/>
             </DataGrid.Columns>
         </DataGrid>
+        <StackPanel>
+            <Button Content="Manage Appointments" Width="150" Click="OpenAppointments_Click" Margin="10"/>
+        </StackPanel>
     </Grid>
 </Window>

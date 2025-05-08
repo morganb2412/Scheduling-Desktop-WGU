@@ -21,6 +21,11 @@ namespace SchedulingDesktopWGU.Views
                 LoadAppointmentsForDay(dpSelectDate.SelectedDate.Value);
             }
         }
+        private void OpenAppointments_Click(object sender, RoutedEventArgs e)
+        {
+            var appointmentForm = new AppointmentForm();
+            appointmentForm.ShowDialog();
+        }
 
         private void LoadAppointmentsForDay(DateTime selectedDate)
         {
