@@ -86,8 +86,8 @@ namespace SchedulingDesktopWGU.Views
         private bool IsWithinBusinessHours(DateTime start, DateTime end)
         {
             TimeZoneInfo estZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
-            var startEST = TimeZoneInfo.ConvertTime(start, estZone);
-            var endEST = TimeZoneInfo.ConvertTime(end, estZone);
+            var startEST = TimeZoneInfo.ConvertTimeFromUtc(start, estZone);
+            var endEST = TimeZoneInfo.ConvertTimeFromUtc(end, estZone);
 
             bool isWeekday = startEST.DayOfWeek >= DayOfWeek.Monday && startEST.DayOfWeek <= DayOfWeek.Friday;
             bool inHours = startEST.TimeOfDay >= TimeSpan.FromHours(9) && endEST.TimeOfDay <= TimeSpan.FromHours(17);
@@ -95,11 +95,12 @@ namespace SchedulingDesktopWGU.Views
             return isWeekday && inHours;
         }
 
+
         private bool HasOverlap(DateTime start, DateTime end)
         {
             DBHelper.OpenConnection();
             string query = @"SELECT * FROM appointment 
-                             WHERE (@start BETWEEN start AND end OR @end BETWEEN start AND end)";
+                     WHERE (@start < end AND @end > start)";
             var cmd = new MySqlCommand(query, DBHelper.conn);
             cmd.Parameters.AddWithValue("@start", start);
             cmd.Parameters.AddWithValue("@end", end);
@@ -111,6 +112,7 @@ namespace SchedulingDesktopWGU.Views
 
             return overlap;
         }
+
 
         private void Add_Click(object sender, RoutedEventArgs e)
         {
@@ -127,32 +129,33 @@ namespace SchedulingDesktopWGU.Views
                 DateTime startLocal = DateTime.ParseExact($"{dpDate.SelectedDate:yyyy-MM-dd} {txtStart.Text}", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
                 DateTime endLocal = DateTime.ParseExact($"{dpDate.SelectedDate:yyyy-MM-dd} {txtEnd.Text}", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
 
-                // Convert to UTC before saving
-                DateTime utcStart = startLocal.ToUniversalTime();
-                DateTime utcEnd = endLocal.ToUniversalTime();
+                // Convert to UTC
+                DateTime startUtc = startLocal.ToUniversalTime();
+                DateTime endUtc = endLocal.ToUniversalTime();
 
-                if (!IsWithinBusinessHours(utcStart, utcEnd))
+                if (!IsWithinBusinessHours(startUtc, endUtc))
                 {
-                    MessageBox.Show("Appointment must be within business hours (9am–5pm EST, Mon–Fri).");
+                    MessageBox.Show("Appointment must be within business hours (9:00 AM – 5:00 PM EST, Monday–Friday).");
                     return;
                 }
 
-                if (HasOverlap(utcStart, utcEnd))
+                if (HasOverlap(startUtc, endUtc))
                 {
                     MessageBox.Show("Appointment overlaps with an existing one.");
                     return;
                 }
 
                 DBHelper.OpenConnection();
+
                 string query = @"INSERT INTO appointment 
-                                 (customerId, userId, type, start, end, createDate, createdBy, lastUpdate, lastUpdateBy)
-                                 VALUES (@custId, 1, @type, @start, @end, NOW(), 'admin', NOW(), 'admin')";
+                         (customerId, userId, type, start, end, createDate, createdBy, lastUpdate, lastUpdateBy)
+                         VALUES (@custId, 1, @type, @start, @end, NOW(), 'admin', NOW(), 'admin')";
 
                 var cmd = new MySqlCommand(query, DBHelper.conn);
                 cmd.Parameters.AddWithValue("@custId", customerId);
                 cmd.Parameters.AddWithValue("@type", type);
-                cmd.Parameters.AddWithValue("@start", utcStart);
-                cmd.Parameters.AddWithValue("@end", utcEnd);
+                cmd.Parameters.AddWithValue("@start", startUtc);
+                cmd.Parameters.AddWithValue("@end", endUtc);
                 cmd.ExecuteNonQuery();
 
                 MessageBox.Show("Appointment added.");
@@ -168,6 +171,7 @@ namespace SchedulingDesktopWGU.Views
                 DBHelper.CloseConnection();
             }
         }
+
 
         private void Update_Click(object sender, RoutedEventArgs e)
         {
