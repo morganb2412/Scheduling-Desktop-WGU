@@ -55,20 +55,19 @@ namespace SchedulingDesktopWGU.Views
             {
                 DBHelper.OpenConnection();
                 string query = @"SELECT a.appointmentId, c.customerName, a.type, a.start, a.end
-                         FROM appointment a
-                         JOIN customer c ON a.customerId = c.customerId";
+                                 FROM appointment a
+                                 JOIN customer c ON a.customerId = c.customerId";
 
                 var adapter = new MySqlDataAdapter(query, DBHelper.conn);
                 var dt = new DataTable();
                 adapter.Fill(dt);
 
-                // Convert UTC to local time for display
                 foreach (DataRow row in dt.Rows)
                 {
                     DateTime utcStart = Convert.ToDateTime(row["start"]);
                     DateTime utcEnd = Convert.ToDateTime(row["end"]);
 
-                    row["start"] = utcStart.ToLocalTime(); // automatically handles DST
+                    row["start"] = utcStart.ToLocalTime(); // Convert for display
                     row["end"] = utcEnd.ToLocalTime();
                 }
 
@@ -83,7 +82,6 @@ namespace SchedulingDesktopWGU.Views
                 DBHelper.CloseConnection();
             }
         }
-
 
         private bool IsWithinBusinessHours(DateTime start, DateTime end)
         {
@@ -102,12 +100,11 @@ namespace SchedulingDesktopWGU.Views
             DBHelper.OpenConnection();
             string query = @"SELECT * FROM appointment 
                              WHERE (@start BETWEEN start AND end OR @end BETWEEN start AND end)";
-
             var cmd = new MySqlCommand(query, DBHelper.conn);
             cmd.Parameters.AddWithValue("@start", start);
             cmd.Parameters.AddWithValue("@end", end);
-            var reader = cmd.ExecuteReader();
 
+            var reader = cmd.ExecuteReader();
             bool overlap = reader.HasRows;
             reader.Close();
             DBHelper.CloseConnection();
@@ -127,34 +124,40 @@ namespace SchedulingDesktopWGU.Views
 
                 int customerId = (int)cbCustomers.SelectedValue;
                 string type = txtType.Text.Trim();
-                DateTime start = DateTime.ParseExact($"{dpDate.SelectedDate:yyyy-MM-dd} {txtStart.Text}", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
-                DateTime end = DateTime.ParseExact($"{dpDate.SelectedDate:yyyy-MM-dd} {txtEnd.Text}", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+                DateTime startLocal = DateTime.ParseExact($"{dpDate.SelectedDate:yyyy-MM-dd} {txtStart.Text}", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+                DateTime endLocal = DateTime.ParseExact($"{dpDate.SelectedDate:yyyy-MM-dd} {txtEnd.Text}", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
 
-                if (!IsWithinBusinessHours(start, end))
+                // Convert to UTC before saving
+                DateTime utcStart = startLocal.ToUniversalTime();
+                DateTime utcEnd = endLocal.ToUniversalTime();
+
+                if (!IsWithinBusinessHours(utcStart, utcEnd))
                 {
                     MessageBox.Show("Appointment must be within business hours (9am–5pm EST, Mon–Fri).");
                     return;
                 }
 
-                if (HasOverlap(start, end))
+                if (HasOverlap(utcStart, utcEnd))
                 {
                     MessageBox.Show("Appointment overlaps with an existing one.");
                     return;
                 }
 
                 DBHelper.OpenConnection();
-                string query = @"INSERT INTO appointment (customerId, userId, type, start, end, createDate, createdBy, lastUpdate, lastUpdateBy)
+                string query = @"INSERT INTO appointment 
+                                 (customerId, userId, type, start, end, createDate, createdBy, lastUpdate, lastUpdateBy)
                                  VALUES (@custId, 1, @type, @start, @end, NOW(), 'admin', NOW(), 'admin')";
 
                 var cmd = new MySqlCommand(query, DBHelper.conn);
                 cmd.Parameters.AddWithValue("@custId", customerId);
                 cmd.Parameters.AddWithValue("@type", type);
-                cmd.Parameters.AddWithValue("@start", start);
-                cmd.Parameters.AddWithValue("@end", end);
+                cmd.Parameters.AddWithValue("@start", utcStart);
+                cmd.Parameters.AddWithValue("@end", utcEnd);
                 cmd.ExecuteNonQuery();
 
                 MessageBox.Show("Appointment added.");
                 LoadAppointments();
+                ClearForm();
             }
             catch (Exception ex)
             {
@@ -178,10 +181,13 @@ namespace SchedulingDesktopWGU.Views
             {
                 int customerId = (int)cbCustomers.SelectedValue;
                 string type = txtType.Text.Trim();
-                DateTime start = DateTime.ParseExact($"{dpDate.SelectedDate:yyyy-MM-dd} {txtStart.Text}", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
-                DateTime end = DateTime.ParseExact($"{dpDate.SelectedDate:yyyy-MM-dd} {txtEnd.Text}", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+                DateTime startLocal = DateTime.ParseExact($"{dpDate.SelectedDate:yyyy-MM-dd} {txtStart.Text}", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+                DateTime endLocal = DateTime.ParseExact($"{dpDate.SelectedDate:yyyy-MM-dd} {txtEnd.Text}", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
 
-                if (!IsWithinBusinessHours(start, end))
+                DateTime utcStart = startLocal.ToUniversalTime();
+                DateTime utcEnd = endLocal.ToUniversalTime();
+
+                if (!IsWithinBusinessHours(utcStart, utcEnd))
                 {
                     MessageBox.Show("Appointment must be within business hours.");
                     return;
@@ -189,19 +195,21 @@ namespace SchedulingDesktopWGU.Views
 
                 DBHelper.OpenConnection();
                 string query = @"UPDATE appointment 
-                                 SET customerId=@custId, type=@type, start=@start, end=@end, lastUpdate=NOW(), lastUpdateBy='admin'
+                                 SET customerId=@custId, type=@type, start=@start, end=@end, 
+                                     lastUpdate=NOW(), lastUpdateBy='admin'
                                  WHERE appointmentId=@id";
 
                 var cmd = new MySqlCommand(query, DBHelper.conn);
                 cmd.Parameters.AddWithValue("@custId", customerId);
                 cmd.Parameters.AddWithValue("@type", type);
-                cmd.Parameters.AddWithValue("@start", start);
-                cmd.Parameters.AddWithValue("@end", end);
+                cmd.Parameters.AddWithValue("@start", utcStart);
+                cmd.Parameters.AddWithValue("@end", utcEnd);
                 cmd.Parameters.AddWithValue("@id", selectedAppointmentId);
                 cmd.ExecuteNonQuery();
 
                 MessageBox.Show("Appointment updated.");
                 LoadAppointments();
+                ClearForm();
             }
             catch (Exception ex)
             {
@@ -231,6 +239,7 @@ namespace SchedulingDesktopWGU.Views
 
                 MessageBox.Show("Appointment deleted.");
                 LoadAppointments();
+                ClearForm();
             }
             catch (Exception ex)
             {
@@ -252,6 +261,16 @@ namespace SchedulingDesktopWGU.Views
                 txtStart.Text = Convert.ToDateTime(row["start"]).ToString("HH:mm");
                 txtEnd.Text = Convert.ToDateTime(row["end"]).ToString("HH:mm");
             }
+        }
+
+        private void ClearForm()
+        {
+            cbCustomers.SelectedIndex = -1;
+            txtType.Clear();
+            txtStart.Text = "09:00";
+            txtEnd.Text = "10:00";
+            dpDate.SelectedDate = null;
+            selectedAppointmentId = -1;
         }
     }
 }

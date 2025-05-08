@@ -72,27 +72,28 @@ namespace SchedulingDesktopWGU.Views
             {
                 DBHelper.OpenConnection();
 
-                // Insert into address
-                string addrQuery = @"INSERT INTO address (address, phone, cityId, createDate, createdBy, lastUpdate, lastUpdateBy)
-                                     VALUES (@address, @phone, 1, NOW(), 'admin', NOW(), 'admin')";
+                string addrQuery = @"INSERT INTO address 
+                             (address, address2, phone, cityId, createDate, createdBy, lastUpdate, lastUpdateBy)
+                             VALUES (@address, @address2, @phone, 1, NOW(), 'admin', NOW(), 'admin')";
                 MySqlCommand addrCmd = new MySqlCommand(addrQuery, DBHelper.conn);
                 addrCmd.Parameters.AddWithValue("@address", txtAddress.Text.Trim());
+                addrCmd.Parameters.AddWithValue("@address2", ""); // fix for missing default value
                 addrCmd.Parameters.AddWithValue("@phone", txtPhone.Text.Trim());
                 addrCmd.ExecuteNonQuery();
 
                 int addressId = (int)addrCmd.LastInsertedId;
 
-                // Insert into customer
-                string custQuery = @"INSERT INTO customer (customerName, addressId, active, createDate, createdBy, lastUpdate, lastUpdateBy) 
-                                     VALUES (@name, @addressId, 1, NOW(), 'admin', NOW(), 'admin')";
+                string custQuery = @"INSERT INTO customer 
+                             (customerName, addressId, active, createDate, createdBy, lastUpdate, lastUpdateBy)
+                             VALUES (@name, @addressId, 1, NOW(), 'admin', NOW(), 'admin')";
                 MySqlCommand custCmd = new MySqlCommand(custQuery, DBHelper.conn);
                 custCmd.Parameters.AddWithValue("@name", txtName.Text.Trim());
                 custCmd.Parameters.AddWithValue("@addressId", addressId);
                 custCmd.ExecuteNonQuery();
 
                 MessageBox.Show("Customer added.");
-                ClearForm();
                 LoadCustomers();
+                ClearForm();
             }
             catch (MySqlException ex)
             {
@@ -103,6 +104,7 @@ namespace SchedulingDesktopWGU.Views
                 DBHelper.CloseConnection();
             }
         }
+
 
         private void Update_Click(object sender, RoutedEventArgs e)
         {

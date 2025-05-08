@@ -1,9 +1,10 @@
-﻿using System.Windows;
+﻿using System;
+using System.Globalization;
+using System.IO;
+using System.Windows;
 using MySql.Data.MySqlClient;
 using SchedulingDesktopWGU.Helpers;
 using SchedulingDesktopWGU.Views;
-using System.IO;
-
 
 namespace SchedulingDesktopWGU
 {
@@ -12,6 +13,20 @@ namespace SchedulingDesktopWGU
         public MainWindow()
         {
             InitializeComponent();
+            LoadLanguageResources(); // ✅ Load localization resources
+        }
+
+        private void LoadLanguageResources()
+        {
+            var culture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+            var dictionary = new ResourceDictionary();
+
+            if (culture == "es")
+                dictionary.Source = new Uri("Resources/Strings.es.xaml", UriKind.Relative);
+            else
+                dictionary.Source = new Uri("Resources/Strings.en.xaml", UriKind.Relative);
+
+            this.Resources.MergedDictionaries.Add(dictionary);
         }
 
         private void Login_Click(object sender, RoutedEventArgs e)
@@ -37,15 +52,11 @@ namespace SchedulingDesktopWGU
                     reader.Close();
                     DBHelper.CloseConnection();
 
-                    // ✅ Log login timestamp
                     LogLoginHistory(dbUsername);
+                    MessageBox.Show((string)FindResource("LoginSuccess")); // ✅ localized
 
-                    MessageBox.Show("Login successful!");
-
-                    // ✅ Check for upcoming appointments
                     CheckUpcomingAppointments(userId);
 
-                    // ✅ Navigate to customer form
                     var customerForm = new CustomerForm();
                     customerForm.Show();
                     this.Close();
@@ -54,7 +65,7 @@ namespace SchedulingDesktopWGU
                 {
                     reader.Close();
                     DBHelper.CloseConnection();
-                    MessageBox.Show("Invalid username or password.");
+                    MessageBox.Show((string)FindResource("LoginFailed"));
                 }
             }
             catch (MySqlException ex)
@@ -65,7 +76,7 @@ namespace SchedulingDesktopWGU
 
         private void LogLoginHistory(string username)
         {
-            string logPath = "Login_History.txt"; // Saved in app directory
+            string logPath = "Login_History.txt";
             string logEntry = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {username} logged in";
 
             try
@@ -78,8 +89,6 @@ namespace SchedulingDesktopWGU
             }
         }
 
-
-
         private void CheckUpcomingAppointments(int userId)
         {
             try
@@ -90,8 +99,8 @@ namespace SchedulingDesktopWGU
                 DateTime soonUtc = nowUtc.AddMinutes(15);
 
                 string query = @"SELECT appointmentId, start 
-                         FROM appointment
-                         WHERE userId = @userId AND start BETWEEN @now AND @soon";
+                                 FROM appointment
+                                 WHERE userId = @userId AND start BETWEEN @now AND @soon";
 
                 MySqlCommand cmd = new MySqlCommand(query, DBHelper.conn);
                 cmd.Parameters.AddWithValue("@userId", userId);
@@ -125,7 +134,5 @@ namespace SchedulingDesktopWGU
                 DBHelper.CloseConnection();
             }
         }
-
-
     }
 }

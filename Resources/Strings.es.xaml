@@ -2,8 +2,14 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
-  <sys:String x:Key="Username">Nombre de usuario</sys:String>
-  <sys:String x:Key="Password">Contraseña</sys:String>
-  <sys:String x:Key="Login">Iniciar sesión</sys:String>
-  <sys:String x:Key="LoginFailed">El nombre de usuario y la contraseña no coinciden.</sys:String>
+
+
+    <sys:String x:Key="Username">Nombre de usuario</sys:String>
+    <sys:String x:Key="Password">Contraseña</sys:String>
+    <sys:String x:Key="Login">Iniciar sesión</sys:String>
+
+
+    <sys:String x:Key="LoginFailed">El nombre de usuario y la contraseña no coinciden.</sys:String>
+    <sys:String x:Key="LoginSuccess">¡Inicio de sesión exitoso!</sys:String>
+
 </ResourceDictionary>
