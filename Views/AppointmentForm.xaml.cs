@@ -125,17 +125,17 @@ namespace SchedulingDesktopWGU.Views
 
                 int customerId = (int)cbCustomers.SelectedValue;
                 string type = txtType.Text.Trim();
+                string title = "General Appointment"; // default value for required 'title' field
+
                 DateTime startLocal = DateTime.ParseExact($"{dpDate.SelectedDate:yyyy-MM-dd} {txtStart.Text}", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
                 DateTime endLocal = DateTime.ParseExact($"{dpDate.SelectedDate:yyyy-MM-dd} {txtEnd.Text}", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
 
-                // ✅ Validate against EST
                 if (!IsWithinBusinessHours(startLocal, endLocal))
                 {
                     MessageBox.Show("Appointment must be within business hours (9:00 AM – 5:00 PM EST, Monday–Friday).");
                     return;
                 }
 
-                // ✅ Convert to UTC after validation
                 DateTime startUtc = startLocal.ToUniversalTime();
                 DateTime endUtc = endLocal.ToUniversalTime();
 
@@ -148,10 +148,11 @@ namespace SchedulingDesktopWGU.Views
                 DBHelper.OpenConnection();
 
                 string query = @"INSERT INTO appointment 
-                         (customerId, userId, type, start, end, createDate, createdBy, lastUpdate, lastUpdateBy)
-                         VALUES (@custId, 1, @type, @start, @end, NOW(), 'admin', NOW(), 'admin')";
+                         (title, customerId, userId, type, start, end, createDate, createdBy, lastUpdate, lastUpdateBy)
+                         VALUES (@title, @custId, 1, @type, @start, @end, NOW(), 'admin', NOW(), 'admin')";
 
                 var cmd = new MySqlCommand(query, DBHelper.conn);
+                cmd.Parameters.AddWithValue("@title", title);
                 cmd.Parameters.AddWithValue("@custId", customerId);
                 cmd.Parameters.AddWithValue("@type", type);
                 cmd.Parameters.AddWithValue("@start", startUtc);
@@ -172,6 +173,7 @@ namespace SchedulingDesktopWGU.Views
             }
         }
 
+
         private void Update_Click(object sender, RoutedEventArgs e)
         {
             if (selectedAppointmentId == -1)
@@ -184,6 +186,8 @@ namespace SchedulingDesktopWGU.Views
             {
                 int customerId = (int)cbCustomers.SelectedValue;
                 string type = txtType.Text.Trim();
+                string title = "General Appointment";
+
                 DateTime startLocal = DateTime.ParseExact($"{dpDate.SelectedDate:yyyy-MM-dd} {txtStart.Text}", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
                 DateTime endLocal = DateTime.ParseExact($"{dpDate.SelectedDate:yyyy-MM-dd} {txtEnd.Text}", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
 
@@ -193,20 +197,22 @@ namespace SchedulingDesktopWGU.Views
                     return;
                 }
 
-                DateTime utcStart = startLocal.ToUniversalTime();
-                DateTime utcEnd = endLocal.ToUniversalTime();
+                DateTime startUtc = startLocal.ToUniversalTime();
+                DateTime endUtc = endLocal.ToUniversalTime();
 
                 DBHelper.OpenConnection();
+
                 string query = @"UPDATE appointment 
-                                 SET customerId=@custId, type=@type, start=@start, end=@end, 
-                                     lastUpdate=NOW(), lastUpdateBy='admin'
-                                 WHERE appointmentId=@id";
+                         SET title=@title, customerId=@custId, type=@type, start=@start, end=@end, 
+                             lastUpdate=NOW(), lastUpdateBy='admin'
+                         WHERE appointmentId=@id";
 
                 var cmd = new MySqlCommand(query, DBHelper.conn);
+                cmd.Parameters.AddWithValue("@title", title);
                 cmd.Parameters.AddWithValue("@custId", customerId);
                 cmd.Parameters.AddWithValue("@type", type);
-                cmd.Parameters.AddWithValue("@start", utcStart);
-                cmd.Parameters.AddWithValue("@end", utcEnd);
+                cmd.Parameters.AddWithValue("@start", startUtc);
+                cmd.Parameters.AddWithValue("@end", endUtc);
                 cmd.Parameters.AddWithValue("@id", selectedAppointmentId);
                 cmd.ExecuteNonQuery();
 
@@ -223,6 +229,7 @@ namespace SchedulingDesktopWGU.Views
                 DBHelper.CloseConnection();
             }
         }
+
 
         private void Delete_Click(object sender, RoutedEventArgs e)
         {
