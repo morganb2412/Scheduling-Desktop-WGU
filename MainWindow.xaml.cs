@@ -18,7 +18,11 @@ namespace SchedulingDesktopWGU
 
         private void LoadLanguageResources()
         {
-            var culture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+            string culture = "en"; // default to English
+
+            if (chkSpanish != null && chkSpanish.IsChecked == true)
+                culture = "es";
+
             var dictionary = new ResourceDictionary();
 
             if (culture == "es")
@@ -26,11 +30,14 @@ namespace SchedulingDesktopWGU
             else
                 dictionary.Source = new Uri("Resources/Strings.en.xaml", UriKind.Relative);
 
+            this.Resources.MergedDictionaries.Clear(); 
             this.Resources.MergedDictionaries.Add(dictionary);
         }
 
+
         private void Login_Click(object sender, RoutedEventArgs e)
         {
+            LoadLanguageResources(); 
             string username = txtUsername.Text.Trim();
             string password = txtPassword.Password.Trim();
 
@@ -47,15 +54,11 @@ namespace SchedulingDesktopWGU
                 if (reader.HasRows)
                 {
                     reader.Read();
-                    int userId = Convert.ToInt32(reader["userId"]);
                     string dbUsername = reader["userName"].ToString();
                     reader.Close();
                     DBHelper.CloseConnection();
 
-                    LogLoginHistory(dbUsername);
-                    MessageBox.Show((string)FindResource("LoginSuccess")); // ✅ localized
-
-                    CheckUpcomingAppointments(userId);
+                    MessageBox.Show((string)FindResource("LoginSuccess"));
 
                     var customerForm = new CustomerForm();
                     customerForm.Show();
@@ -73,6 +76,7 @@ namespace SchedulingDesktopWGU
                 MessageBox.Show("Database Error: " + ex.Message);
             }
         }
+
 
         private void LogLoginHistory(string username)
         {
