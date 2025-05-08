@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using MySql.Data.MySqlClient;
 using SchedulingDesktopWGU.Helpers;
+using SchedulingDesktopWGU.Views;
 
 namespace SchedulingDesktopWGU.Views
 {
@@ -42,6 +43,11 @@ namespace SchedulingDesktopWGU.Views
             {
                 DBHelper.CloseConnection();
             }
+        }
+        private void ViewReports_Click(object sender, RoutedEventArgs e)
+        {
+            var reportsWindow = new ReportsWindow();
+            reportsWindow.ShowDialog();
         }
 
         private bool ValidateCustomer()

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Windows;
@@ -31,29 +30,29 @@ namespace SchedulingDesktopWGU.Views
             {
                 DBHelper.OpenConnection();
                 string query = "SELECT type, start FROM appointment";
-                MySqlCommand cmd = new MySqlCommand(query, DBHelper.conn);
-                MySqlDataAdapter adapter = new MySqlDataAdapter(cmd);
+                MySqlDataAdapter adapter = new MySqlDataAdapter(query, DBHelper.conn);
                 DataTable dt = new DataTable();
                 adapter.Fill(dt);
 
-                var results = dt.AsEnumerable()
-                    .GroupBy(row => new
+                var report = dt.AsEnumerable()
+                    .GroupBy(r => new
                     {
-                        Type = row.Field<string>("type"),
-                        Month = row.Field<DateTime>("start").ToString("MMMM")
+                        Type = r.Field<string>("type"),
+                        Month = r.Field<DateTime>("start").ToString("MMMM")
                     })
-                    .Select(group => new
+                    .Select(g => new
                     {
-                        Type = group.Key.Type,
-                        Month = group.Key.Month,
-                        Count = group.Count()
-                    }).ToList();
+                        Type = g.Key.Type,
+                        Month = g.Key.Month,
+                        Count = g.Count()
+                    })
+                    .ToList();
 
-                ReportGrid.ItemsSource = results;
+                ReportGrid.ItemsSource = report;
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Report Error: " + ex.Message);
+                MessageBox.Show("Error: " + ex.Message);
             }
             finally
             {
@@ -69,25 +68,25 @@ namespace SchedulingDesktopWGU.Views
                 string query = @"SELECT u.userName, a.type, a.start, a.end
                                  FROM appointment a
                                  JOIN user u ON a.userId = u.userId";
-                MySqlCommand cmd = new MySqlCommand(query, DBHelper.conn);
-                MySqlDataAdapter adapter = new MySqlDataAdapter(cmd);
+                MySqlDataAdapter adapter = new MySqlDataAdapter(query, DBHelper.conn);
                 DataTable dt = new DataTable();
                 adapter.Fill(dt);
 
-                var results = dt.AsEnumerable()
-                    .Select(row => new
+                var report = dt.AsEnumerable()
+                    .Select(r => new
                     {
-                        User = row.Field<string>("userName"),
-                        Type = row.Field<string>("type"),
-                        Start = row.Field<DateTime>("start").ToLocalTime(),
-                        End = row.Field<DateTime>("end").ToLocalTime()
-                    }).ToList();
+                        User = r.Field<string>("userName"),
+                        Type = r.Field<string>("type"),
+                        Start = r.Field<DateTime>("start").ToLocalTime(),
+                        End = r.Field<DateTime>("end").ToLocalTime()
+                    })
+                    .ToList();
 
-                ReportGrid.ItemsSource = results;
+                ReportGrid.ItemsSource = report;
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Report Error: " + ex.Message);
+                MessageBox.Show("Error: " + ex.Message);
             }
             finally
             {
@@ -100,29 +99,29 @@ namespace SchedulingDesktopWGU.Views
             try
             {
                 DBHelper.OpenConnection();
-                string query = @"SELECT a.type, a.start, ci.city
+                string query = @"SELECT ci.city, a.appointmentId
                                  FROM appointment a
                                  JOIN customer c ON a.customerId = c.customerId
                                  JOIN address ad ON c.addressId = ad.addressId
                                  JOIN city ci ON ad.cityId = ci.cityId";
-                MySqlCommand cmd = new MySqlCommand(query, DBHelper.conn);
-                MySqlDataAdapter adapter = new MySqlDataAdapter(cmd);
+                MySqlDataAdapter adapter = new MySqlDataAdapter(query, DBHelper.conn);
                 DataTable dt = new DataTable();
                 adapter.Fill(dt);
 
-                var results = dt.AsEnumerable()
-                    .GroupBy(row => row.Field<string>("city"))
-                    .Select(group => new
+                var report = dt.AsEnumerable()
+                    .GroupBy(r => r.Field<string>("city"))
+                    .Select(g => new
                     {
-                        City = group.Key,
-                        Appointments = group.Count()
-                    }).ToList();
+                        City = g.Key,
+                        Appointments = g.Count()
+                    })
+                    .ToList();
 
-                ReportGrid.ItemsSource = results;
+                ReportGrid.ItemsSource = report;
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Report Error: " + ex.Message);
+                MessageBox.Show("Error: " + ex.Message);
             }
             finally
             {

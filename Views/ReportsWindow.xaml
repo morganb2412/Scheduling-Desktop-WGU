@@ -4,10 +4,10 @@
         Title="Reports" Height="500" Width="700">
     <Grid Margin="10">
         <StackPanel>
-            <ComboBox x:Name="reportSelector" Margin="0,0,0,10" SelectionChanged="reportSelector_SelectionChanged">
-                <ComboBoxItem Content="Appointments by Type and Month" />
-                <ComboBoxItem Content="Schedule for Each User" />
-                <ComboBoxItem Content="Appointments by City" />
+            <ComboBox x:Name="reportSelector" SelectionChanged="reportSelector_SelectionChanged" Margin="0,0,0,10" Width="300">
+                <ComboBoxItem Content="Appointments by Type and Month"/>
+                <ComboBoxItem Content="Schedule for Each User"/>
+                <ComboBoxItem Content="Appointments by City"/>
             </ComboBox>
             <DataGrid x:Name="ReportGrid" AutoGenerateColumns="True" Height="400"/>
         </StackPanel>
