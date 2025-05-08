@@ -41,6 +41,8 @@
                 <Button Content="Delete" Width="75" Click="Delete_Click" Margin="5" Height="23"/>
                 <Button Content="View Reports" Width="120" Click="ViewReports_Click" Margin="10"/>
                 <Button Content="View Calendar" Width="120" Click="ViewCalendar_Click" Margin="10"/>
+                <Button Content="Manage Appointments" Width="150" Click="OpenAppointments_Click" Margin="10"/>
+
 
             </StackPanel>
         </StackPanel>
