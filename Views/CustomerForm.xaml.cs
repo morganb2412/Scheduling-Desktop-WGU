@@ -54,6 +54,12 @@ namespace SchedulingDesktopWGU.Views
             var calendarView = new CalendarView();
             calendarView.ShowDialog();
         }
+        private void OpenAppointments_Click(object sender, RoutedEventArgs e)
+        {
+            var appointmentForm = new AppointmentForm();
+            appointmentForm.ShowDialog();
+        }
+
 
 
         private bool ValidateCustomer()
