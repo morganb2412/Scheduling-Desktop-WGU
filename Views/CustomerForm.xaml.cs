@@ -73,12 +73,13 @@ namespace SchedulingDesktopWGU.Views
                 DBHelper.OpenConnection();
 
                 string addrQuery = @"INSERT INTO address 
-                             (address, address2, phone, cityId, createDate, createdBy, lastUpdate, lastUpdateBy)
-                             VALUES (@address, @address2, @phone, 1, NOW(), 'admin', NOW(), 'admin')";
+                             (address, address2, phone,postalCode, cityId, createDate, createdBy, lastUpdate, lastUpdateBy)
+                             VALUES (@address, @address2, @phone,@postalCode, 1, NOW(), 'admin', NOW(), 'admin')";
                 MySqlCommand addrCmd = new MySqlCommand(addrQuery, DBHelper.conn);
                 addrCmd.Parameters.AddWithValue("@address", txtAddress.Text.Trim());
                 addrCmd.Parameters.AddWithValue("@address2", ""); // fix for missing default value
                 addrCmd.Parameters.AddWithValue("@phone", txtPhone.Text.Trim());
+                addrCmd.Parameters.AddWithValue("@postalCode", "00000");
                 addrCmd.ExecuteNonQuery();
 
                 int addressId = (int)addrCmd.LastInsertedId;
