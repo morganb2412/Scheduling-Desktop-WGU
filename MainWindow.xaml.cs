@@ -30,9 +30,26 @@ namespace SchedulingDesktopWGU
             else
                 dictionary.Source = new Uri("Resources/Strings.en.xaml", UriKind.Relative);
 
-            this.Resources.MergedDictionaries.Clear(); 
+            this.Resources.MergedDictionaries.Clear();
             this.Resources.MergedDictionaries.Add(dictionary);
+
+            
+            ApplyLocalizedLabels();
         }
+
+        private void ApplyLocalizedLabels()
+        {
+            lblUsername.Text = (string)FindResource("Username");
+            lblPassword.Text = (string)FindResource("Password");
+            btnLogin.Content = (string)FindResource("Login");
+        }
+
+        private void chkSpanish_Checked(object sender, RoutedEventArgs e)
+        {
+            LoadLanguageResources();
+        }
+
+
 
 
         private void Login_Click(object sender, RoutedEventArgs e)
